@@ -2,14 +2,14 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>ArtsyNest — Baby's Art Journey</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,500;0,600;0,700;0,800;0,900;1,300&family=Jua&display=swap" rel="stylesheet">
 <style>
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  html,body { height:100%; background:#2b2118; overflow:hidden; font-family:'Poppins','Jua',sans-serif; }
-  #wrap { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; }
+  html,body { height:100%; min-height: 100%; margin:0;background:#2b2118; overflow-x:hidden; overflow-y: auto; font-family:'Poppins','Jua',sans-serif; }
+  #wrap { position:relative; width: 100%; display:flex; align-items:flex-start; overflow: hidden; }
   #stage { position:relative; width:1179px; height:2556px; background:#FFD851; overflow:hidden;
     transform-origin:center center; border-radius:56px; box-shadow:0 30px 80px rgba(0,0,0,.45);
     touch-action:none; user-select:none; }
@@ -255,10 +255,39 @@ const HINTS = { en:'Tap card to flip \u00b7 Swipe to explore colors',
 const MODAL_HINT = { en:'Tap anywhere to close', ko:'\ud654\uba74\uc744 \ud0ed\ud558\uba74 \ub2eb\ud600\uc694' };
 
 const stage = document.getElementById('stage');
-function fit(){
-  const s = Math.min(innerWidth/1179, innerHeight/2556) * 0.985;
-  stage.style.transform = 'scale(' + s + ')';
+const DESIGN_WIDTH = 1179;
+const DESIGN_HEIGHT = 2556;
+
+function fit() {
+  const screenWidth = window.visualViewport
+    ? window.visualViewport.width
+    : window.innerWidth;
+
+  const availableWidth = Math.min(screenWidth, DESIGN_WIDTH);
+
+  // Small margin around the app.
+  const scale = Math.min(availableWidth / DESIGN_WIDTH, 1) * 0.98;
+
+  stage.style.transform = `scale(${scale})`;
+
+  // A transform changes appearance but not layout dimensions,
+  // so manually set the wrapper's scaled height.
+  const scaledHeight = DESIGN_HEIGHT * scale;
+  const scaledWidth = DESIGN_WIDTH * scale;
+
+  const wrap = document.getElementById('wrap');
+  wrap.style.height = `${scaledHeight}px`;
+  wrap.style.minWidth = `${scaledWidth}px`;
 }
+
+window.addEventListener('resize', fit);
+window.addEventListener('orientationchange', fit);
+
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', fit);
+}
+
+fit();
 addEventListener('resize', fit); fit();
 const $ = id => document.getElementById(id);
 
